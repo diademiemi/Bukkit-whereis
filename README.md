@@ -1,4 +1,4 @@
-<img src="img/whereis.png" align="right" alt="Logo" title="Logo" width="400" height="400" />
+<img src="img/whereis.png" align="right" alt="whereis" title="whereis" width="250" height="250" />
 
 # Bukkit-whereis
 
