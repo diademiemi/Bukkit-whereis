@@ -8,7 +8,7 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.command.Command;
 import org.bukkit.command.FormattedCommandAlias;
 import org.bukkit.command.MultipleCommandAlias;
-import org.bukkit.command.PluginCommand;
+import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
@@ -67,17 +67,20 @@ public class CommandExec implements CommandExecutor {
                                     }    
                                 }
 
-                            // If the command is provided by a plugin
-                            } else if (cmd instanceof PluginCommand) {
-                                info.append(format("&7&oPlugin command&r\n"));
-                                PluginCommand pcmd = (PluginCommand) cmd;
-                                info.append(format(String.format("&8Plugin: &7&o%s&r\n", pcmd.getPlugin().getName())));
-                                info.append(format(String.format("&8Main command: &7&o%s&r", cmd.getName())));
-
-                            // Default to the command being provided by the server
+                            // Default to plugin command or the command being provided by the server
                             } else {
-                                info.append(format("&7&oServer command&r\n"));
-                                info.append(format(String.format("&8Main command: &7&o%s&r", cmd.getName())));   
+                                try {
+                                    // Attempt to get a plugin command
+                                    PluginIdentifiableCommand pcmd = (PluginIdentifiableCommand) cmd;
+                                    info.append(format("&7&oPlugin command&r\n"));
+                                    info.append(format(String.format("&8Plugin: &7&o%s&r\n", pcmd.getPlugin().getName())));
+                                    info.append(format(String.format("&8Main command: &7&o%s&r", cmd.getName())));
+                                // Fall back to server command
+                                } catch (Exception e) {
+                                    info.append(format("&7&oServer command&r\n"));
+                                    info.append(format(String.format("&8Main command: &7&o%s&r", cmd.getName())));   
+    
+                                }
                             }
                             sender.sendMessage(info.toString());
                         // Report that no command was found
