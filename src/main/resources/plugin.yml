@@ -1,0 +1,10 @@
+name: whereis
+description: Simple Unix-like whereis
+author: diademiemi
+version: 1.0.0
+main: me.diademiemi.whereis.WhereIs
+api-version: 1.13
+commands:
+  whereis:
+    description: Gets what provides a command
+    usage: /whereis <command>
