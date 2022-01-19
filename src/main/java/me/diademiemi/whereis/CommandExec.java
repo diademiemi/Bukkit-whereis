@@ -41,51 +41,55 @@ public class CommandExec implements CommandExecutor {
         // Listen to the whereis command
         if (label.equalsIgnoreCase("whereis")) {
             if (args.length > 0) {
-                try {
-                    // Attempt to get the command map from the server
-                    final Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+                if (sender.hasPermission("whereis.whereis")) {
+                    try {
+                        // Attempt to get the command map from the server
+                        final Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");
 
-                    bukkitCommandMap.setAccessible(true);
-                    CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
-                    try { 
-                        // Attempt to get command from command map
-                        Command cmd = commandMap.getCommand(args[0]);
-                        // Create string for formatting
-                        StringBuilder info = new StringBuilder(format(String.format("&f&l%s: ", args[0].toString())));
+                        bukkitCommandMap.setAccessible(true);
+                        CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
+                        try { 
+                            // Attempt to get command from command map
+                            Command cmd = commandMap.getCommand(args[0]);
+                            // Create string for formatting
+                            StringBuilder info = new StringBuilder(format(String.format("&f&l%s: ", args[0].toString())));
 
-                        if (cmd instanceof FormattedCommandAlias || cmd instanceof MultipleCommandAlias) {
-                            // If the alias has one command
-                            if (Bukkit.getServer().getCommandAliases().get(args[0]).length == 1) {
-                                info.append(format("&7&oSimple alias\n"));
-                                info.append(format(String.format("&8Command: &7&o%s&r", Bukkit.getServer().getCommandAliases().get(args[0])[0])));
-                            // If the alias has multiple commands
+                            if (cmd instanceof FormattedCommandAlias || cmd instanceof MultipleCommandAlias) {
+                                // If the alias has one command
+                                if (Bukkit.getServer().getCommandAliases().get(args[0]).length == 1) {
+                                    info.append(format("&7&oSimple alias\n"));
+                                    info.append(format(String.format("&8Command: &7&o%s&r", Bukkit.getServer().getCommandAliases().get(args[0])[0])));
+                                // If the alias has multiple commands
+                                } else {
+                                    info.append(format("&7&oMulti-command Alias&r"));
+                                    for (String a : Bukkit.getServer().getCommandAliases().get(args[0])) {
+                                        info.append(format(String.format("\n&8- &7&o%s&r", a)));
+                                    }    
+                                }
+
+                            // If the command is provided by a plugin
+                            } else if (cmd instanceof PluginCommand) {
+                                info.append(format("&7&oPlugin command&r\n"));
+                                PluginCommand pcmd = (PluginCommand) cmd;
+                                info.append(format(String.format("&8Plugin: &7&o%s&r\n", pcmd.getPlugin().getName())));
+                                info.append(format(String.format("&8Main command: &7&o%s&r", cmd.getName())));
+
+                            // Default to the command being provided by the server
                             } else {
-                                info.append(format("&7&oMulti-command Alias&r"));
-                                for (String a : Bukkit.getServer().getCommandAliases().get(args[0])) {
-                                    info.append(format(String.format("\n&8- &7&o%s&r", a)));
-                                }    
+                                info.append(format("&7&oServer command&r\n"));
+                                info.append(format(String.format("&8Main command: &7&o%s&r", cmd.getName())));   
                             }
-
-                        // If the command is provided by a plugin
-                        } else if (cmd instanceof PluginCommand) {
-                            info.append(format("&7&oPlugin command&r\n"));
-                            PluginCommand pcmd = (PluginCommand) cmd;
-                            info.append(format(String.format("&8Plugin: &7&o%s&r\n", pcmd.getPlugin().getName())));
-                            info.append(format(String.format("&8Main command: &7&o%s&r", cmd.getName())));
-
-                        // Default to the command being provided by the server
-                        } else {
-                            info.append(format("&7&oServer command&r\n"));
-                            info.append(format(String.format("&8Main command: &7&o%s&r", cmd.getName())));   
+                            sender.sendMessage(info.toString());
+                        // Report that no command was found
+                        } catch (Exception e) {
+                            sender.sendMessage(format("&8No command found!"));
                         }
-                        sender.sendMessage(info.toString());
-                    // Report that no command was found
+                    // If the command map couldn't be obtained
                     } catch (Exception e) {
-                        sender.sendMessage(format("&8No command found!"));
+                        e.printStackTrace();
                     }
-                // If the command map couldn't be obtained
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } else {
+                    sender.sendMessage("&8Permission denied");
                 }
             }
         }
